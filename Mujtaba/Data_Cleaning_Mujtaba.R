@@ -28,3 +28,6 @@ dat %>% group_by(Id) %>% summarise_if(is.numeric,mean)
       geom_point() +
       geom_smooth() +
       ggtitle("Year Sold vs Sale Price")
+
+    
+  
