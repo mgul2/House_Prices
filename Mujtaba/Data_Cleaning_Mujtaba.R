@@ -1,5 +1,7 @@
 library(ggplot2)
 library(dplyr)
+library(tidyr)
+library(data.table)
 
 
 setwd("/Users/mujtabagul/House_Prices/Datasets/")
@@ -55,3 +57,12 @@ dat_house %>% group_by(Id) %>% summarise_if(is.numeric,mean)
       ggplot(aes(cond_qual, SalePrice)) +
       geom_point() +
       geom_smooth()
+
+    
+    
+#### WORKING ON TRAIN_MUJTABA (Pre-processing)
+    train_mujtaba$SalePrice = train_madhup$SalePrice
+    train_mujtaba$Alley = train_mujtaba$Alley %>% as.character()
+    train_mujtaba$Alley = train_mujtaba$Alley %>% replace_na("No Access")
+    #train_mujtaba$Alley[which(is.na(train_mujtaba$Alley))]="No Access"    Another way to replace NAs 
+    
