@@ -35,7 +35,7 @@ for (i in colnames(train)){
 # Divide dataset into 2 halves, Madhup will process columns 44-86
 
 train_mujtaba = train[, c(1:43)]
-train_madhup = train[, c(44:86)]
+train_madhup = train[, c(44:85)]
 dim(train_madhup)
 dim(train_mujtaba)
 
