@@ -61,8 +61,27 @@ dat_house %>% group_by(Id) %>% summarise_if(is.numeric,mean)
     
     
 #### WORKING ON TRAIN_MUJTABA (Pre-processing)
+    train_mujtaba = train_mujtaba %>% mutate_at(c("BsmtQual","BsmtCond", "BsmtExposure",
+                                                  "BsmtFinType1", "BsmtFinType2","Alley",
+                                                  "MasVnrType","Electrical"),
+                                                as.character)
     train_mujtaba$SalePrice = train_madhup$SalePrice
-    train_mujtaba$Alley = train_mujtaba$Alley %>% as.character()
     train_mujtaba$Alley = train_mujtaba$Alley %>% replace_na("No Access")
+    train_mujtaba$BsmtQual = train_mujtaba$BsmtQual %>% replace_na("No Basement")
+    train_mujtaba$BsmtExposure = train_mujtaba$BsmtExposure %>% replace_na("No Basement")
+    train_mujtaba$BsmtCond = train_mujtaba$BsmtCond %>% replace_na("No Basement")
+    train_mujtaba$BsmtFinType1 = train_mujtaba$BsmtFinType1 %>% replace_na("No Basement")
+    train_mujtaba$BsmtFinType2 = train_mujtaba$BsmtFinType2 %>% replace_na("No Basement")
+    train_mujtaba$MasVnrType = train_mujtaba$MasVnrType %>% replace_na("None")
+    
+    train_mujtaba$LotFrontage = train_mujtaba$LotFrontage %>% 
+                                replace_na(train_mujtaba$LotFrontage %>% mean(na.rm=T))
+    train_mujtaba$MasVnrArea = train_mujtaba$MasVnrArea %>% replace_na(0)
+    train_mujtaba$Electrical = train_mujtaba$Electrical %>% replace_na("SBrkr")
+    
+    
+    
+    
+    
     #train_mujtaba$Alley[which(is.na(train_mujtaba$Alley))]="No Access"    Another way to replace NAs 
     
