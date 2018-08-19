@@ -9,6 +9,8 @@ library(plyr)
 install.packages("regclass")
 library(regclass)
 library(rockchalk)
+install.packages("polycor")
+library(polycor)
 
 #################################################### View dataset ####################################################
 train %>% dim()
@@ -95,47 +97,72 @@ train_test_madhup$BsmtUnf_prop_perc[which(is.na(train_test_madhup$BsmtUnf_prop_p
 # Function to get mode of the factor variable
 find_mode = function(var_name) names(table(var_name)[which.max(table(var_name))])
 
-train_test_madhup$BsmtFullBath[is.na(train_test_madhup$BsmtFullBath), ] = 
+# Impute rest of the columns with Mode
+train_test_madhup$BsmtFullBath[is.na(train_test_madhup$BsmtFullBath)] = find_mode(BsmtFullBath)
+train_test_madhup$BsmtHalfBath[is.na(train_test_madhup$BsmtHalfBath)] = find_mode(BsmtHalfBath)
+train_test_madhup$KitchenQual[is.na(train_test_madhup$KitchenQual)] = find_mode(KitchenQual)
+train_test_madhup$Functional[is.na(train_test_madhup$Functional)] = find_mode(Functional)
+train_test_madhup$GarageCars[is.na(train_test_madhup$GarageCars)] = '0'
+train_test_madhup$GarageArea[is.na(train_test_madhup$GarageArea)] = 0
+train_test_madhup$SaleType[is.na(train_test_madhup$SaleType)] = find_mode(SaleType)
 
-####################################################### Combine Levels ########################################################
+# ####################################################### Combine Levels ########################################################
+# 
+# # We will combine levels if the 1 class is dominating over other in a categorical variable
+# 
+# # BsmtFullBath
+# count(train_test_madhup, "BsmtFullBath")
+# aggregate(SalePrice ~ BsmtFullBath, data = train_test_madhup, mean)
+# suggest_levels(SalePrice ~ BsmtFullBath, data = train_test_madhup)
+# 
+# train_test_madhup$BsmtFullBath = combineLevels(train_test_madhup$BsmtFullBath,levs = c('1','2','3' ), newLabel = c("1") )
+# levels(train_test_madhup$BsmtFullBath)
+# class(train_test_madhup$BsmtFullBath)
+# 
+# train_test_madhup$BsmtFullBath = revalue(train_test_madhup$BsmtFullBath, c('0' = '0', 'Not 0' = '1'))
+# 
+# # BsmtHalfBath
+# 
+# count(train_test_madhup, "BsmtHalfBath")
+# aggregate(SalePrice ~ BsmtHalfBath, data = train_test_madhup, mean)
+# suggest_levels(SalePrice ~ BsmtHalfBath, data = train_test_madhup)
+# 
+# #Best BIC value is obtained after collapsing all levels into 1. We will drop this column later on.
+# train_test_madhup$BsmtHalfBath = combineLevels(train_test_madhup$BsmtHalfBath,levs = c('1','2' ), newLabel = c("1") )
+# levels(train_test_madhup$BsmtHalfBath)
+# 
+# # FullBath
+# count(train_test_madhup, "FullBath")
+# aggregate(SalePrice ~ FullBath, data = train_test_madhup, mean)
+# suggest_levels(SalePrice ~ FullBath, data = train_test_madhup)
+# # No need to combine the levels
+# 
+# # HalfBath
+# count(train_test_madhup, "HalfBath")
+# aggregate(SalePrice ~ HalfBath, data = train_test_madhup, median)
+# suggest_levels(SalePrice ~ HalfBath, data = train_test_madhup)
+# # No need to combine the levels
+# 
+# # BedroomAbvGr
+# count(train_test_madhup, "BedroomAbvGr")
+# aggregate(SalePrice ~ BedroomAbvGr, data = train_test_madhup, median)
+# suggest_levels(SalePrice ~ BedroomAbvGr, data = train_test_madhup)
 
-# We will combine levels if the 1 class is dominating over other in a categorical variable
+train_test_madhup %>% View()
+train_test_madhup %>% dim()
+train_test_madhup %>% str() 
 
-# BsmtFullBath
-count(train_test_madhup, "BsmtFullBath")
-aggregate(SalePrice ~ BsmtFullBath, data = train_test_madhup, mean)
-suggest_levels(SalePrice ~ BsmtFullBath, data = train_test_madhup)
+####################################################### Drop Columns ###############################################
+# train_test_madhup$MiscFeature = NULL
+# 
+# plot(train_test_madhup$GarageArea ~ train_test_madhup$GarageCars) # GarageCars and GarageArea are correlated
+# 
+# table(GarageQual, GarageCond)
+# options(scipen = 999)
+# summary(train_test_madhup[1:1460,])
+# 
+# plot(density(log(train_test$GarageYrBlt), na.rm = TRUE))
+##################################### Merge train_test_madhup dataset with Mujtaba's dataset ##################################### 
 
-train_test_madhup$BsmtFullBath = combineLevels(train_test_madhup$BsmtFullBath,levs = c('1','2','3' ), newLabel = c("1") )
-levels(train_test_madhup$BsmtFullBath)
-class(train_test_madhup$BsmtFullBath)
-
-train_test_madhup$BsmtFullBath = revalue(train_test_madhup$BsmtFullBath, c('0' = '0', 'Not 0' = '1'))
-
-# BsmtHalfBath
-
-count(train_test_madhup, "BsmtHalfBath")
-aggregate(SalePrice ~ BsmtHalfBath, data = train_test_madhup, mean)
-suggest_levels(SalePrice ~ BsmtHalfBath, data = train_test_madhup)
-
-#Best BIC value is obtained after collapsing all levels into 1. We will drop this column later on.
-train_test_madhup$BsmtHalfBath = combineLevels(train_test_madhup$BsmtHalfBath,levs = c('1','2' ), newLabel = c("1") )
-levels(train_test_madhup$BsmtHalfBath)
-
-# FullBath
-count(train_test_madhup, "FullBath")
-aggregate(SalePrice ~ FullBath, data = train_test_madhup, mean)
-suggest_levels(SalePrice ~ FullBath, data = train_test_madhup)
-# No need to combine the levels
-
-# HalfBath
-count(train_test_madhup, "HalfBath")
-aggregate(SalePrice ~ HalfBath, data = train_test_madhup, median)
-suggest_levels(SalePrice ~ HalfBath, data = train_test_madhup)
-# No need to combine the levels
-
-# BedroomAbvGr
-count(train_test_madhup, "BedroomAbvGr")
-aggregate(SalePrice ~ BedroomAbvGr, data = train_test_madhup, median)
-suggest_levels(SalePrice ~ BedroomAbvGr, data = train_test_madhup)
+train_test = cbind(train_test_mujtaba, train_test_madhup)
 
