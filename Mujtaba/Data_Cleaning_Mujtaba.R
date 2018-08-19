@@ -6,7 +6,7 @@ library(data.table)
 
 setwd("/Users/mujtabagul/House_Prices/Datasets/")
 dat_house = fread("train.csv")
-
+dat_test = fread("test.csv")
 ### FEATURE ENGINEERING
 dat_house$Remodelling = ifelse((dat_house$YearRemodAdd - dat_house$YearBuilt) > 0, "YES", "NO")
 dat_house$BsmtUnf_prop = (dat_house$BsmtUnfSF/dat_house$TotalBsmtSF) %>% is.finite()
@@ -50,38 +50,51 @@ dat_house %>% group_by(Id) %>% summarise_if(is.numeric,mean)
       summarise( SalePrice = mean(SalePrice)) %>%
       ggplot(aes(Neighborhood)) +
       geom_bar(aes(y=SalePrice), stat='identity',colour='green',fill='paleturquoise4') +
-      ggtitle("Neighbourhood vs Sales Price")
+      ggtitle("Neighbourhood vs Sales Price") +
+      
   
     dat_house %>% group_by(cond_qual) %>%
       summarise( SalePrice = mean(SalePrice)) %>%
       ggplot(aes(cond_qual, SalePrice)) +
       geom_point() +
       geom_smooth()
+    
 
     
     
 #### WORKING ON TRAIN_MUJTABA (Pre-processing)
-    train_mujtaba = train_mujtaba %>% mutate_at(c("BsmtQual","BsmtCond", "BsmtExposure",
-                                                  "BsmtFinType1", "BsmtFinType2","Alley",
-                                                  "MasVnrType","Electrical"),
-                                                as.character)
     train_mujtaba$SalePrice = train_madhup$SalePrice
-    train_mujtaba$Alley = train_mujtaba$Alley %>% replace_na("No Access")
-    train_mujtaba$BsmtQual = train_mujtaba$BsmtQual %>% replace_na("No Basement")
-    train_mujtaba$BsmtExposure = train_mujtaba$BsmtExposure %>% replace_na("No Basement")
-    train_mujtaba$BsmtCond = train_mujtaba$BsmtCond %>% replace_na("No Basement")
-    train_mujtaba$BsmtFinType1 = train_mujtaba$BsmtFinType1 %>% replace_na("No Basement")
-    train_mujtaba$BsmtFinType2 = train_mujtaba$BsmtFinType2 %>% replace_na("No Basement")
-    train_mujtaba$MasVnrType = train_mujtaba$MasVnrType %>% replace_na("None")
+    test_mujtaba = dat_test[,1:43]
+    test_mujtaba$SalePrice = 0 
+    dat_complete = rbind(train_mujtaba,test_mujtaba)
     
-    train_mujtaba$LotFrontage = train_mujtaba$LotFrontage %>% 
-                                replace_na(train_mujtaba$LotFrontage %>% mean(na.rm=T))
-    train_mujtaba$MasVnrArea = train_mujtaba$MasVnrArea %>% replace_na(0)
-    train_mujtaba$Electrical = train_mujtaba$Electrical %>% replace_na("SBrkr")
+    Mode <- function(x) {
+      ux <- unique(x)
+      ux[which.max(tabulate(match(x, ux)))]
+    }
     
     
+    dat_complete = dat_complete %>% mutate_at(c("BsmtQual","BsmtCond", "BsmtExposure",
+                                                "BsmtFinType1", "BsmtFinType2","Alley",
+                                                "MasVnrType","Electrical","MSZoning",
+                                                "Utilities","Exterior1st","Exterior2nd",
+                                                "BsmtFinSF1","BsmtFinSF2","BsmtUnfSF",
+                                                "TotalBsmtSF"),
+                                                as.character)
+    
+    dat_complete$Alley = dat_complete$Alley %>% replace_na("No Access")
+    dat_complete$BsmtQual = dat_complete$BsmtQual %>% replace_na("No Basement")
+    dat_complete$BsmtExposure = dat_complete$BsmtExposure %>% replace_na("No Basement")
+    dat_complete$BsmtCond = dat_complete$BsmtCond %>% replace_na("No Basement")
+    dat_complete$BsmtFinType1 = dat_complete$BsmtFinType1 %>% replace_na("No Basement")
+    dat_complete$BsmtFinType2 = dat_complete$BsmtFinType2 %>% replace_na("No Basement")
+    dat_complete$MasVnrType = dat_complete$MasVnrType %>% replace_na("None")
+    dat_complete$LotFrontage = dat_complete$LotFrontage %>% 
+                                replace_na(dat_complete$LotFrontage %>% mean(na.rm=T))
+    dat_complete$MasVnrArea = dat_complete$MasVnrArea %>% replace_na(0)
+    dat_complete$Electrical = dat_complete$Electrical %>% replace_na("SBrkr")
+    dat_complete$MSZoning = ifelse(dat_complete$MSSubClass==20,
+                                   replace_na("RL"),replace_na("RM"))
     
     
-    
-    #train_mujtaba$Alley[which(is.na(train_mujtaba$Alley))]="No Access"    Another way to replace NAs 
-    
+  
