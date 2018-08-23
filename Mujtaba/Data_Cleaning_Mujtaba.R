@@ -96,5 +96,5 @@ dat_house %>% group_by(Id) %>% summarise_if(is.numeric,mean)
     dat_complete$MSZoning = ifelse(dat_complete$MSSubClass==20,
                                    replace_na("RL"),replace_na("RM"))
     
-    
+    dim(dat_complete)
   

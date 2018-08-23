@@ -1,18 +1,22 @@
 #################################################### Import Libraries ####################################################
+install.packages("imputeTS")
+install.packages("regclass")
+install.packages("polycor")
+
 library(dplyr)
 attach(train)
 library(forcats) 
 library(tidyr)
-install.packages("imputeTS")
 library(imputeTS)
 library(plyr)
-install.packages("regclass")
 library(regclass)
 library(rockchalk)
-install.packages("polycor")
 library(polycor)
 
 #################################################### View dataset ####################################################
+
+#Import Datasets
+# EDA
 train %>% dim()
 train %>% str()
 test %>% dim()
@@ -153,7 +157,8 @@ train_test_madhup %>% dim()
 train_test_madhup %>% str() 
 
 ####################################################### Drop Columns ###############################################
-# train_test_madhup$MiscFeature = NULL
+
+train_test_madhup$MiscFeature = NULL
 # 
 # plot(train_test_madhup$GarageArea ~ train_test_madhup$GarageCars) # GarageCars and GarageArea are correlated
 # 
@@ -162,7 +167,9 @@ train_test_madhup %>% str()
 # summary(train_test_madhup[1:1460,])
 # 
 # plot(density(log(train_test$GarageYrBlt), na.rm = TRUE))
+
 ##################################### Merge train_test_madhup dataset with Mujtaba's dataset ##################################### 
+
 
 train_test = cbind(train_test_mujtaba, train_test_madhup)
 
