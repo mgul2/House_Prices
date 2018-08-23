@@ -110,7 +110,7 @@ train_test_madhup$GarageCars[is.na(train_test_madhup$GarageCars)] = '0'
 train_test_madhup$GarageArea[is.na(train_test_madhup$GarageArea)] = 0
 train_test_madhup$SaleType[is.na(train_test_madhup$SaleType)] = find_mode(SaleType)
 
-# ####################################################### Combine Levels ########################################################
+# ###################################################### Combine Levels ###############################################
 # 
 # # We will combine levels if the 1 class is dominating over other in a categorical variable
 # 
@@ -168,8 +168,42 @@ train_test_madhup$MiscFeature = NULL
 # 
 # plot(density(log(train_test$GarageYrBlt), na.rm = TRUE))
 
-##################################### Merge train_test_madhup dataset with Mujtaba's dataset ##################################### 
-
-
+#################################### Merge train_test_madhup dataset with Mujtaba's dataset ################################
+dim(dat_complete)
+train_test_mujtaba = dat_complete
 train_test = cbind(train_test_mujtaba, train_test_madhup)
+train_test %>% dim
+train_test %>% str
 
+# Convert char to factor:
+
+train_test$Alley = as.factor(train_test$Alley)
+to_factor = c('MasVnrType', 'BsmtQual', 'BsmtCond', 'BsmtExposure', 'BsmtFinType1', 'BsmtFinType2', 'Electrical')
+train_test[to_factor] = lapply(train_test[to_factor], factor)
+
+####################################################### Train Test Split ################################################
+train_test[146, 81]
+train <- train_test[1:1460,]
+test <- train_test[1461:2919,]
+train %>% dim
+test %>% dim
+
+####################################################### Bivariate Analysis ###################################################
+
+class(train$YearBuilt)
+table(train$YearBuilt, train$SalePrice)
+
+
+####################################################### Feature Extraction ###################################################
+
+# Run a linear model to get significant variables
+
+X = train[,-c(1, 81)]
+y = train[,81]
+Z = as.data.frame(cbind(X, y))
+fit = lm(y ~ ., data = Z)
+summary(fit)
+
+####################################################### Misc. work ###################################################
+
+medians = train %>% group_by(Neighborhood) %>% summarise(LotFrontage = median(LotFrontage))
