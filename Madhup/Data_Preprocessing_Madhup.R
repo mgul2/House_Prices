@@ -16,6 +16,8 @@ library(polycor)
 #################################################### View dataset ####################################################
 
 #Import Datasets
+train = read.csv(file.choose(), header = TRUE)
+test = read.csv(file.choose(), header = TRUE)
 # EDA
 train %>% dim()
 train %>% str()
@@ -44,7 +46,9 @@ train_test$Remodelling = ifelse((train_test$YearRemodAdd - train_test$YearBuilt)
 train_test$BsmtUnf_prop_perc = (train_test$BsmtUnfSF/train_test$TotalBsmtSF)
 train_test$age_house = train_test$YrSold - train_test$YearBuilt
 train_test$cond_qual = train_test$OverallCond + train_test$OverallQual
+train_test$RemodelAge = train_test$YrSold - train_test$YearRemodAdd
 
+train_test %>% dim
 ############################################# Convert categorical variables into Factor #######################################
 
 # Select column number to be converted to factors:
@@ -58,7 +62,7 @@ train_test[to_factor] = lapply(train_test[to_factor], factor)
 ################################# Divide dataset into 2 halves, Madhup will process columns 44-85#############################
 
 train_test_mujtaba = train_test[, c(1:43)]
-train_test_madhup = train_test[, c(44:85)]
+train_test_madhup = train_test[, c(44:86)]
 dim(train_test_madhup)
 dim(train_test_mujtaba)
 str(train_test_madhup)
@@ -174,7 +178,10 @@ train_test_mujtaba = dat_complete
 train_test = cbind(train_test_mujtaba, train_test_madhup)
 train_test %>% dim
 train_test %>% str
-
+train_test$SalePrice1 <- train_test$SalePrice
+train_test$SalePrice = NULL
+train_test$SalePrice = train_test$SalePrice1
+train_test$SalePrice1 = NULL
 # Convert char to factor:
 
 train_test$Alley = as.factor(train_test$Alley)
@@ -182,28 +189,40 @@ to_factor = c('MasVnrType', 'BsmtQual', 'BsmtCond', 'BsmtExposure', 'BsmtFinType
 train_test[to_factor] = lapply(train_test[to_factor], factor)
 
 ####################################################### Train Test Split ################################################
-train_test[146, 81]
+
 train <- train_test[1:1460,]
 test <- train_test[1461:2919,]
 train %>% dim
 test %>% dim
+train %>% str()
 
 ####################################################### Bivariate Analysis ###################################################
 
 class(train$YearBuilt)
 table(train$YearBuilt, train$SalePrice)
+aggregate(train_test$SalePrice, by = list(train_test$Alley), FUN = mean)
+table(train_test$Neighborhood, train_test$Alley)
+aggregate(train_test$SalePrice, by = list(train_test$Neighborhood), FUN = mean)
+aggregate(train_test$SalePrice, by = list(train_test$LotConfig), FUN = mean)
+aggregate(train_test$SalePrice, by = list(train_test$YearBuilt), FUN = sum)
+table(YearRemodAdd)
+hist(train$RemodelAge, breaks = 10)
+quantile(train$RemodelAge)
+train$RemodelAge[train$RemodelAge < 0] = 0
 
-
+# Drop street, alley, utilities, Condition2, YearBuilt (will use age), 
 ####################################################### Feature Extraction ###################################################
 
 # Run a linear model to get significant variables
 
-X = train[,-c(1, 81)]
-y = train[,81]
+X = train[,-c(1, 80)]
+y = train[,80]
 Z = as.data.frame(cbind(X, y))
 fit = lm(y ~ ., data = Z)
 summary(fit)
-
+train %>% View()
+train %>% summary()
 ####################################################### Misc. work ###################################################
 
-medians = train %>% group_by(Neighborhood) %>% summarise(LotFrontage = median(LotFrontage))
+medians = as.data.frame(aggregate(train$LotFrontage, by=list(train$Neighborhood), FUN=mean))
+xx = list(colnames(train))
