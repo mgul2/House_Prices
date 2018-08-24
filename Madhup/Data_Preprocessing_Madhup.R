@@ -49,6 +49,7 @@ train_test$cond_qual = train_test$OverallCond + train_test$OverallQual
 train_test$RemodelAge = train_test$YrSold - train_test$YearRemodAdd
 
 train_test %>% dim
+train_test %>% str()
 ############################################# Convert categorical variables into Factor #######################################
 
 # Select column number to be converted to factors:
@@ -72,13 +73,13 @@ attach(train_test_madhup)
 
 # Create a fucntion which shows all columns with number of missing values:
 
-find_missing_values = function(){
-                                  missing_count <-sapply(train_test_madhup, function(y) sum(length(which(is.na(y)))))
+find_missing_values = function(x){
+                                  missing_count <-sapply(x, function(y) sum(length(which(is.na(y)))))
                                   missing_count <- data.frame(missing_count)
                                   View(missing_count)
 }
 
-find_missing_values()
+find_missing_values(train)
 
 summary(train_test_madhup)
 
@@ -113,6 +114,7 @@ train_test_madhup$Functional[is.na(train_test_madhup$Functional)] = find_mode(Fu
 train_test_madhup$GarageCars[is.na(train_test_madhup$GarageCars)] = '0'
 train_test_madhup$GarageArea[is.na(train_test_madhup$GarageArea)] = 0
 train_test_madhup$SaleType[is.na(train_test_madhup$SaleType)] = find_mode(SaleType)
+tra
 
 # ###################################################### Combine Levels ###############################################
 # 
@@ -209,8 +211,11 @@ table(YearRemodAdd)
 hist(train$RemodelAge, breaks = 10)
 quantile(train$RemodelAge)
 train$RemodelAge[train$RemodelAge < 0] = 0
-
-# Drop street, alley, utilities, Condition2, YearBuilt (will use age), 
+fit_age = lm(SalePrice ~ age_house, data = train)
+fit_age_rem = lm(SalePrice ~ RemodelAge, data = train)
+fit_age %>% summary()
+fit_age_rem %>% summary()
+# Drop street, alley, utilities, Condition2, YearBuilt (will use age), yearRemodel, 
 ####################################################### Feature Extraction ###################################################
 
 # Run a linear model to get significant variables
@@ -219,9 +224,19 @@ X = train[,-c(1, 80)]
 y = train[,80]
 Z = as.data.frame(cbind(X, y))
 fit = lm(y ~ ., data = Z)
+options(max.print = 5000)
 summary(fit)
 train %>% View()
 train %>% summary()
+train %>% str()
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page 
+plot(fit)
+train$SalePrice %>% mean()
+train[826,]
+train[524,]
+train[1325,]
+VIF(fit)
+alias(fit) # ElectricalMix, HeatingOthW, 
 ####################################################### Misc. work ###################################################
 
 medians = as.data.frame(aggregate(train$LotFrontage, by=list(train$Neighborhood), FUN=mean))
