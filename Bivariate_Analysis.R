@@ -21,7 +21,7 @@ test <- train_test[1461:2919,]
 train %>% dim
 test %>% dim
 train %>% str()
-
+test[c(1916,2121,2152,2217,2251,2905),]  %>% View()
 ####################################################### Bivariate Analysis ###################################################
 
 class(train$YearBuilt)
@@ -43,7 +43,7 @@ fit_age_rem %>% summary()
 ####################################################### Feature Extraction ###################################################
 
 # Run a linear model to get significant variables
-
+View(train)
 X = train[,-c(1, 80)]
 y = train[,80]
 Z = as.data.frame(cbind(X, y))

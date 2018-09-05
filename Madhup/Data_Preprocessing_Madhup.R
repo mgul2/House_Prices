@@ -50,7 +50,7 @@ train_test$RemodelAge = train_test$YrSold - train_test$YearRemodAdd
 
 train_test %>% dim
 train_test %>% str()
-############################################# Convert categorical variables into Factor #######################################
+############################################# Convert categorical variables into Factor and vice versa #######################################
 
 # Select column number to be converted to factors:
 
@@ -59,6 +59,8 @@ train_test %>% str()
 to_factor = c(2, 3, 18, 19, 20, 21, 48:53, 55, 57, 62, 72, 77, 78, 82)
 
 train_test[to_factor] = lapply(train_test[to_factor], factor)
+
+
 
 ################################# Divide dataset into 2 halves, Madhup will process columns 44-85#############################
 
